@@ -1,5 +1,12 @@
 # Anchor
 
+Anchor is a personal knowledge management API. It's main purpose is to act as a bridge between a user's knowledge base (notes, journals, tasks management system, etc) and expose these to AI agents & LLMs as a tool or MCP.
+
+
+---
+
+## Setup
+
 To install dependencies:
 
 ```bash
