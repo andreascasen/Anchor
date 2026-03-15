@@ -1,0 +1,22 @@
+import { Hono } from 'hono'
+import { env } from './env'
+
+const app = new Hono()
+
+app.use('/api/*', async (ctx, next) => {
+	const key = ctx.req.header('x-api-key')
+	if (key !== env.API_KEY) {
+		return ctx.json({ error: 'Unauthorized' }, 401)
+	}
+	return next()
+})
+
+app.get('/health', (ctx) =>
+	ctx.json({ ok: true, ts: new Date().toISOString() }),
+)
+
+app.get('/api/*', async (ctx) => {
+	return ctx.json({ error: 'Route not found' }, 404)
+})
+
+export default app
