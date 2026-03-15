@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { env } from './env'
+import { tasksRouter } from './api/tasks'
 
 const app = new Hono()
 
@@ -10,6 +11,8 @@ app.use('/api/*', async (ctx, next) => {
 	}
 	return next()
 })
+
+app.route('/api/tasks', tasksRouter)
 
 app.get('/health', (ctx) =>
 	ctx.json({ ok: true, ts: new Date().toISOString() }),
