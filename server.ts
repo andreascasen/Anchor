@@ -15,7 +15,7 @@ app.get('/health', (ctx) =>
 	ctx.json({ ok: true, ts: new Date().toISOString() }),
 )
 
-app.get('/api/*', async (ctx) => {
+app.get('/*', async (ctx) => {
 	return ctx.json({ error: 'Route not found' }, 404)
 })
 
