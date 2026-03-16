@@ -3,6 +3,8 @@ import { z } from 'zod'
 const envSchema = z.object({
 	PORT: z.coerce.number().default(3000),
 	API_KEY: z.string(),
+	TODOIST_API_TOKEN: z.optional(z.string()),
+	DB_DIRECTORY: z.string(),
 })
 
 function parseEnv() {
