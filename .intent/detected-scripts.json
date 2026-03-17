@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "detectedAt": "2026-03-17T22:11:33.818Z",
+  "packageManager": "npm",
+  "manifestHash": "466d07233dad8f3537a894fbf0929276034779e7803962000786730a95313211",
+  "scripts": [
+    {
+      "name": "dev",
+      "command": "npm run dev",
+      "category": "dev",
+      "mode": "service"
+    }
+  ]
+}
