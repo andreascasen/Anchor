@@ -16,6 +16,7 @@
 	"dependencies": {
 		"@doist/todoist-api-typescript": "7.1.1",
 		"drizzle-orm": "^0.45.1",
+		"gray-matter": "^4.0.3",
 		"hono": "4.12.8",
 		"zod": "4.3.6"
 	}

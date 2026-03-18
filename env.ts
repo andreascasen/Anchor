@@ -5,6 +5,7 @@ const envSchema = z.object({
 	API_KEY: z.string(),
 	TODOIST_API_TOKEN: z.optional(z.string()),
 	DB_DIRECTORY: z.string(),
+	OBSIDIAN_VAULT_PATH: z.string(),
 })
 
 function parseEnv() {
