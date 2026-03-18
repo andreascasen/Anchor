@@ -37,10 +37,11 @@ async function collectMarkdownFiles(dir: string): Promise<string[]> {
 // -- Git sync --
 
 function pullVault(): { success: boolean; output: string } {
-	const result = Bun.spawnSync(['git', 'pull'], {
+	const result = Bun.spawnSync(['/bin/sh', '-c', 'git pull'], {
 		cwd: env.OBSIDIAN_VAULT_PATH,
 		stdout: 'pipe',
 		stderr: 'pipe',
+		env: process.env,
 	})
 	const output = [
 		result.stdout ? new TextDecoder().decode(result.stdout) : '',
