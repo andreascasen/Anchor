@@ -12,15 +12,17 @@ const DB_PATH = path.join(env.DB_DIRECTORY, 'brain.db')
 
 await fs.mkdir(env.DB_DIRECTORY, { recursive: true })
 const sqlite = new Database(DB_PATH)
-export const db = drizzle({ client: sqlite })
+export const dbClient = drizzle({ client: sqlite })
 
-migrate(db, { migrationsFolder: './migrations' })
+migrate(dbClient, { migrationsFolder: './migrations' })
 
 export const notes = sqliteTable('notes', {
 	filePath: text('file_path').primaryKey(),
 	title: text('title').notNull(),
 	tags: text('tags', { mode: 'json' }).$type<string[]>().default(sql`'[]'`),
-	frontmatter: text('frontmatter', { mode: 'json' }).$type<Record<string, unknown>>().default(sql`'{}'`),
+	frontmatter: text('frontmatter', { mode: 'json' })
+		.$type<Record<string, unknown>>()
+		.default(sql`'{}'`),
 	content: text('content').notNull(),
 	modifiedAt: text('modified_at').notNull(),
 	indexedAt: text('indexed_at').notNull(),
