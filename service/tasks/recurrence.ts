@@ -1,6 +1,17 @@
 import { z } from 'zod'
 
+const WEEKDAY = {
+	sun: 0,
+	mon: 1,
+	tue: 2,
+	wed: 3,
+	thu: 4,
+	fri: 5,
+	sat: 6,
+} as const
+
 const periodMultiplierSchema = z.number().int().positive().default(1)
+const recurrenceTypes = z.enum(['interval', 'weekly', 'monthly'])
 
 const intervalSchema = z.object({
 	type: z.literal('interval'),
@@ -14,10 +25,10 @@ const weeklyPeriodicSchema = z.object({
 })
 const monthlyPeriodicSchema = z.object({
 	type: z.literal(['monthly']),
-	date: z.number().int().positive().default(1),
+	dateOfTheMonth: z.number().int().positive().default(1),
 	multiplier: periodMultiplierSchema,
 })
-const recurrencePatternSchema = z.discriminatedUnion('type', [
+export const recurrencePatternSchema = z.discriminatedUnion('type', [
 	intervalSchema,
 	weeklyPeriodicSchema,
 	monthlyPeriodicSchema,
@@ -26,21 +37,29 @@ const recurrencePatternSchema = z.discriminatedUnion('type', [
 export type RecurrencePattern = z.infer<typeof recurrencePatternSchema>
 
 export function computeNextDueDate(
-	recurrence: RecurrencePattern,
+	recurrenceParam: RecurrencePattern,
 	completedAt: Date,
 ): Date {
+	const { success, data: recurrence } =
+		recurrencePatternSchema.safeParse(recurrenceParam)
+
+	if (!success) {
+		throw new Error(`Invalid recurrence param: ${recurrenceParam}`)
+	}
+
 	if (recurrence.type === 'interval') {
 		const next = new Date(completedAt)
-		if (recurrence.unit === 'd') next.setDate(next.getDate() + recurrence.n)
+		if (recurrence.unit === 'd')
+			next.setDate(next.getDate() + recurrence.multiplier)
 		else if (recurrence.unit === 'w')
-			next.setDate(next.getDate() + recurrence.n * 7)
+			next.setDate(next.getDate() + recurrence.multiplier * 7)
 		else if (recurrence.unit === 'm')
-			next.setMonth(next.getMonth() + recurrence.n)
+			next.setMonth(next.getMonth() + recurrence.multiplier)
 		return next
 	}
 
-	if (recurrence.type === 'weekday') {
-		const targetDay = WEEKDAY[recurrence.day]
+	if (recurrence.type === 'weekly') {
+		const targetDay = WEEKDAY[recurrence.weekday]
 		const next = new Date(completedAt)
 		next.setHours(0, 0, 0, 0)
 		next.setDate(next.getDate() + 1)
@@ -48,6 +67,10 @@ export function computeNextDueDate(
 		if (recurrence.multiplier > 1)
 			next.setDate(next.getDate() + (recurrence.multiplier - 1) * 7)
 		return next
+	}
+
+	if (recurrence.type === 'monthly') {
+		const { dateOfTheMonth, multiplier } = recurrence
 	}
 
 	// monthday
