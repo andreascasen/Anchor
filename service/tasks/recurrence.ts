@@ -36,9 +36,15 @@ export const recurrencePatternSchema = z.discriminatedUnion('type', [
 
 export type RecurrencePattern = z.infer<typeof recurrencePatternSchema>
 
+const safeMonthDate = (year: number, month: number, day: number): Date => {
+	const daysInMonth = new Date(year, month + 1, 0).getDate()
+	return new Date(year, month, Math.min(day, daysInMonth))
+}
+
 export function computeNextDueDate(
 	recurrenceParam: RecurrencePattern,
 	completedAt: Date,
+	due: Date | undefined,
 ): Date {
 	const { success, data: recurrence } =
 		recurrencePatternSchema.safeParse(recurrenceParam)
@@ -47,108 +53,49 @@ export function computeNextDueDate(
 		throw new Error(`Invalid recurrence param: ${recurrenceParam}`)
 	}
 
+	let nextDueDate: Date = new Date(completedAt)
+
 	if (recurrence.type === 'interval') {
-		const next = new Date(completedAt)
+		nextDueDate = new Date(completedAt)
 		if (recurrence.unit === 'd')
-			next.setDate(next.getDate() + recurrence.multiplier)
+			nextDueDate.setDate(nextDueDate.getDate() + recurrence.multiplier)
 		else if (recurrence.unit === 'w')
-			next.setDate(next.getDate() + recurrence.multiplier * 7)
+			nextDueDate.setDate(nextDueDate.getDate() + recurrence.multiplier * 7)
 		else if (recurrence.unit === 'm')
-			next.setMonth(next.getMonth() + recurrence.multiplier)
-		return next
+			nextDueDate.setMonth(nextDueDate.getMonth() + recurrence.multiplier)
 	}
 
 	if (recurrence.type === 'weekly') {
 		const targetDay = WEEKDAY[recurrence.weekday]
-		const next = new Date(completedAt)
-		next.setHours(0, 0, 0, 0)
-		next.setDate(next.getDate() + 1)
-		while (next.getDay() !== targetDay) next.setDate(next.getDate() + 1)
-		if (recurrence.multiplier > 1)
-			next.setDate(next.getDate() + (recurrence.multiplier - 1) * 7)
-		return next
+
+		if (due && completedAt < due) {
+			// Completed early: advance from the due date by a full interval
+			nextDueDate = new Date(due)
+			nextDueDate.setHours(0, 0, 0, 0)
+			nextDueDate.setDate(nextDueDate.getDate() + recurrence.multiplier * 7)
+		} else {
+			// Completed on time or overdue: find the next target weekday after completion
+			nextDueDate = new Date(completedAt)
+			nextDueDate.setHours(0, 0, 0, 0)
+			nextDueDate.setDate(nextDueDate.getDate() + 1)
+			while (nextDueDate.getDay() !== targetDay)
+				nextDueDate.setDate(nextDueDate.getDate() + 1)
+			if (recurrence.multiplier > 1)
+				nextDueDate.setDate(
+					nextDueDate.getDate() + (recurrence.multiplier - 1) * 7,
+				)
+		}
 	}
 
 	if (recurrence.type === 'monthly') {
 		const { dateOfTheMonth, multiplier } = recurrence
+		const baseDate = due ?? completedAt
+		nextDueDate = safeMonthDate(
+			baseDate.getFullYear(),
+			baseDate.getMonth() + multiplier,
+			dateOfTheMonth,
+		)
 	}
 
-	// monthday
-	const { targetDay } = recurrence
-	const next = new Date(completedAt)
-	next.setHours(0, 0, 0, 0)
-
-	const daysInCurrentMonth = new Date(
-		next.getFullYear(),
-		next.getMonth() + 1,
-		0,
-	).getDate()
-	const currentMonthHasTargetDay = daysInCurrentMonth >= targetDay
-
-	if (currentMonthHasTargetDay) next.setDate(targetDay)
-
-	if (!currentMonthHasTargetDay || next <= completedAt) {
-		next.setDate(1)
-		next.setMonth(next.getMonth() + 1)
-		const daysInNextMonth = new Date(
-			next.getFullYear(),
-			next.getMonth() + 1,
-			0,
-		).getDate()
-		next.setDate(Math.min(targetDay, daysInNextMonth))
-	}
-
-	return next
-}
-export function computeNextDueDate(
-	recurrence: RecurrencePattern,
-	completedAt: Date,
-): Date {
-	if (recurrence.type === 'interval') {
-		const next = new Date(completedAt)
-		if (recurrence.unit === 'd') next.setDate(next.getDate() + recurrence.n)
-		else if (recurrence.unit === 'w')
-			next.setDate(next.getDate() + recurrence.n * 7)
-		else if (recurrence.unit === 'm')
-			next.setMonth(next.getMonth() + recurrence.n)
-		return next
-	}
-
-	if (recurrence.type === 'weekday') {
-		const targetDay = WEEKDAY[recurrence.day]
-		const next = new Date(completedAt)
-		next.setHours(0, 0, 0, 0)
-		next.setDate(next.getDate() + 1)
-		while (next.getDay() !== targetDay) next.setDate(next.getDate() + 1)
-		if (recurrence.multiplier > 1)
-			next.setDate(next.getDate() + (recurrence.multiplier - 1) * 7)
-		return next
-	}
-
-	// monthday
-	const { targetDay } = recurrence
-	const next = new Date(completedAt)
-	next.setHours(0, 0, 0, 0)
-
-	const daysInCurrentMonth = new Date(
-		next.getFullYear(),
-		next.getMonth() + 1,
-		0,
-	).getDate()
-	const currentMonthHasTargetDay = daysInCurrentMonth >= targetDay
-
-	if (currentMonthHasTargetDay) next.setDate(targetDay)
-
-	if (!currentMonthHasTargetDay || next <= completedAt) {
-		next.setDate(1)
-		next.setMonth(next.getMonth() + 1)
-		const daysInNextMonth = new Date(
-			next.getFullYear(),
-			next.getMonth() + 1,
-			0,
-		).getDate()
-		next.setDate(Math.min(targetDay, daysInNextMonth))
-	}
-
-	return next
+	return nextDueDate
 }
