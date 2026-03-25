@@ -1,16 +1,11 @@
 import { eq, inArray, not } from 'drizzle-orm'
+import type z from 'zod'
 import { dbClient, tasksTable } from '../dataSources/sqlite'
 import { NotFoundError, ValidationError } from '../lib/errors'
-import { taskSchema } from './taskDb'
+import { partialTaskSchema, taskSchema } from './taskSchemas'
 
-export const createTask = async (params: unknown) => {
-	const { success, data: taskPayload } = taskSchema.safeParse(params)
-
-	if (!success) {
-		throw new ValidationError(`Invalid task data`)
-	}
-
-	const { recurrence, ...taskData } = taskPayload
+export const createTask = async (params: z.infer<typeof taskSchema>) => {
+	const { recurrence, ...taskData } = params
 
 	const [newTask] = await dbClient
 		.insert(tasksTable)
@@ -33,14 +28,11 @@ export const getTasks = async () => {
 	return tasks
 }
 
-export const updateTask = async (taskId: string, params: unknown) => {
-	const { success, data: taskPayload } = taskSchema.partial().safeParse(params)
-
-	if (!success) {
-		throw new ValidationError('Invalid task data')
-	}
-
-	const { recurrence, ...taskData } = taskPayload
+export const updateTask = async (
+	taskId: string,
+	params: z.infer<typeof partialTaskSchema>,
+) => {
+	const { recurrence, ...taskData } = params
 
 	const [updatedTask] = await dbClient
 		.update(tasksTable)

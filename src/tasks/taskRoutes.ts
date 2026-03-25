@@ -2,8 +2,8 @@ import { Hono } from 'hono'
 import z from 'zod'
 import { validateRequestBody } from '../lib/api'
 import { handleApiError } from '../lib/errors'
-import { taskSchema } from './taskDb'
 import { createTask, deleteTasks, getTasks, updateTask } from './taskHandlers'
+import { partialTaskSchema, taskSchema } from './taskSchemas'
 
 export const tasksRouter = new Hono()
 
@@ -19,7 +19,7 @@ tasksRouter.get('/', async (ctx) => {
 
 tasksRouter.post('/', async (ctx) => {
 	try {
-		const params = await ctx.req.json()
+		const params = await validateRequestBody(ctx, taskSchema)
 
 		await createTask(params)
 
@@ -33,7 +33,7 @@ tasksRouter.post('/', async (ctx) => {
 tasksRouter.patch('/:id', async (ctx) => {
 	try {
 		const taskId = ctx.req.param('id')
-		const params = await ctx.req.json()
+		const params = await validateRequestBody(ctx, partialTaskSchema)
 
 		const updatedTask = await updateTask(taskId, params)
 

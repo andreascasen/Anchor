@@ -11,3 +11,6 @@ export const taskSchema = z.object({
 })
 
 export type Task = z.infer<typeof taskSchema>
+
+export const partialTaskSchema = taskSchema.partial()
+export type PartialTask = z.infer<typeof partialTaskSchema>
