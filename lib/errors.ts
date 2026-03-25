@@ -1,3 +1,4 @@
+import type { Context } from 'hono'
 import type { StatusCode } from 'hono/utils/http-status'
 
 export class CustomError extends Error {
@@ -22,4 +23,15 @@ export class AuthError extends CustomError {
 		super(message, 401)
 		this.name = 'AuthError'
 	}
+}
+
+export const handleApiError = (ctx: Context, error: unknown) => {
+	if (error instanceof CustomError) {
+		ctx.status(error.statusCode)
+		return ctx.json({ error: error.message })
+	}
+
+	console.error('Unexpected error:', error)
+	ctx.status(500)
+	return ctx.json({ error: 'Internal Server Error' })
 }

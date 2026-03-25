@@ -1,5 +1,5 @@
 import type { Context } from 'hono'
-import { CustomError, ValidationError } from './errors'
+import { CustomError } from './errors'
 
 export const handlerWrapper = async (
 	ctx: Context,
