@@ -11,7 +11,6 @@ const WEEKDAY = {
 } as const
 
 const periodMultiplierSchema = z.number().int().positive().default(1)
-const recurrenceTypes = z.enum(['interval', 'weekly', 'monthly'])
 
 const intervalSchema = z.object({
 	type: z.literal('interval'),
