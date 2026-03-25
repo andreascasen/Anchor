@@ -23,24 +23,3 @@ export const tasksTable = sqliteTable('tasks', {
 	status: text('status').notNull().default('pending'),
 	recurrence: text('recurrence'),
 })
-
-export const createTask = async ({
-	title,
-	description,
-	priority,
-	status,
-	recurrence,
-}: Task) => {
-	const result = await dbClient
-		.insert(tasksTable)
-		.values({
-			id: crypto.randomUUID(),
-			title,
-			description,
-			priority,
-			status,
-			recurrence: JSON.stringify(recurrence),
-		})
-		.returning({ id: tasksTable.id })
-	return result[0]
-}
