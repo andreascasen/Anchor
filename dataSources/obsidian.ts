@@ -3,7 +3,7 @@ import path from 'node:path'
 import matter from 'gray-matter'
 import { eq, like, or } from 'drizzle-orm'
 import { env } from '../env'
-import { db, notes } from './sqlite'
+import { dbClient, notes } from './sqlite'
 
 export type NoteMeta = typeof notes.$inferSelect
 
@@ -15,7 +15,9 @@ function extractTags(
 ): string[] {
 	const fmTags = frontmatter.tags
 	const fromFm: string[] = Array.isArray(fmTags) ? (fmTags as string[]) : []
-	const fromBody = [...body.matchAll(/#([\w/-]+)/g)].map((m) => m[1])
+	const fromBody = [...body.matchAll(/#([\w/-]+)/g)].flatMap((m) =>
+		m[1] ? [m[1]] : [],
+	)
 	return [...new Set([...fromFm, ...fromBody])]
 }
 
@@ -53,7 +55,7 @@ function pullVault(): { success: boolean; output: string } {
 }
 
 const removeStaleNotesFromDb = async (vaultPaths: Set<string>) => {
-	const allIndexedNotes = await db
+	const allIndexedNotes = await dbClient
 		.select({ filePath: notes.filePath })
 		.from(notes)
 	const staleNotesInDb = allIndexedNotes.filter(
@@ -62,7 +64,7 @@ const removeStaleNotesFromDb = async (vaultPaths: Set<string>) => {
 
 	await Promise.all(
 		staleNotesInDb.map(async (staleNote) => {
-			await db.delete(notes).where(eq(notes.filePath, staleNote.filePath))
+			await dbClient.delete(notes).where(eq(notes.filePath, staleNote.filePath))
 		}),
 	)
 
@@ -79,7 +81,7 @@ const indexNoteChangesInDb = async (vaultPaths: Set<string>) => {
 			const stat = await fs.stat(fileInVault)
 			const modifiedAt = stat.mtime.toISOString()
 
-			const existing = await db
+			const existing = await dbClient
 				.select({ indexedAt: notes.indexedAt, modifiedAt: notes.modifiedAt })
 				.from(notes)
 				.where(eq(notes.filePath, relativePath))
@@ -95,7 +97,7 @@ const indexNoteChangesInDb = async (vaultPaths: Set<string>) => {
 				(frontmatter.title as string) || path.basename(fileInVault, '.md')
 			const tags = extractTags(frontmatter, body)
 
-			await db
+			await dbClient
 				.insert(notes)
 				.values({
 					filePath: relativePath,
@@ -150,11 +152,11 @@ export async function syncAndIndex(): Promise<{
 // -- Queries (all hit SQLite) --
 
 export async function listNotes(): Promise<NoteMeta[]> {
-	return db.select().from(notes)
+	return dbClient.select().from(notes)
 }
 
 export async function getNote(filePath: string): Promise<Note | null> {
-	const rows = await db
+	const rows = await dbClient
 		.select()
 		.from(notes)
 		.where(eq(notes.filePath, filePath))
@@ -164,7 +166,7 @@ export async function getNote(filePath: string): Promise<Note | null> {
 
 export async function searchNotes(query: string): Promise<Note[]> {
 	const pattern = `%${query}%`
-	return db
+	return dbClient
 		.select()
 		.from(notes)
 		.where(
