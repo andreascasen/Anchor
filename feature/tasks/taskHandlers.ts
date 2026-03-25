@@ -1,6 +1,6 @@
 import { eq, inArray, not } from 'drizzle-orm'
 import { dbClient } from '../../dataSources/sqlite'
-import { ValidationError } from '../../lib/errors'
+import { NotFoundError, ValidationError } from '../../lib/errors'
 import { taskSchema, tasksTable } from './taskDb'
 
 export const createTask = async (params: unknown) => {
@@ -31,6 +31,31 @@ export const getTasks = async () => {
 		.where(not(eq(tasksTable.status, 'completed')))
 
 	return tasks
+}
+
+export const updateTask = async (taskId: string, params: unknown) => {
+	const { success, data: taskPayload } = taskSchema.partial().safeParse(params)
+
+	if (!success) {
+		throw new ValidationError('Invalid task data')
+	}
+
+	const { recurrence, ...taskData } = taskPayload
+
+	const [updatedTask] = await dbClient
+		.update(tasksTable)
+		.set({
+			...taskData,
+			...(recurrence !== undefined && { recurrence: JSON.stringify(recurrence) }),
+		})
+		.where(eq(tasksTable.id, taskId))
+		.returning()
+
+	if (!updatedTask) {
+		throw new NotFoundError(`Task ${taskId} not found`)
+	}
+
+	return updatedTask
 }
 
 export const deleteTasks = async (taskIds: string[]) => {

@@ -25,6 +25,13 @@ export class AuthError extends CustomError {
 	}
 }
 
+export class NotFoundError extends CustomError {
+	constructor(message: string) {
+		super(message, 404)
+		this.name = 'NotFoundError'
+	}
+}
+
 export const handleApiError = (ctx: Context, error: unknown) => {
 	if (error instanceof CustomError) {
 		ctx.status(error.statusCode)

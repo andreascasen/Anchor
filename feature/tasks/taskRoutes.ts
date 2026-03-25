@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { createTask, deleteTasks, getTasks } from './taskHandlers'
+import { createTask, deleteTasks, getTasks, updateTask } from './taskHandlers'
 import { handleApiError } from '../../lib/errors'
 
 export const tasksRouter = new Hono()
@@ -22,6 +22,20 @@ tasksRouter.post('/', async (ctx) => {
 
 		ctx.status(201)
 		return ctx.json({ message: 'Task created' })
+	} catch (error: unknown) {
+		return handleApiError(ctx, error)
+	}
+})
+
+tasksRouter.patch('/:id', async (ctx) => {
+	try {
+		const taskId = ctx.req.param('id')
+		const params = await ctx.req.json()
+
+		const updatedTask = await updateTask(taskId, params)
+
+		ctx.status(200)
+		return ctx.json({ task: updatedTask })
 	} catch (error: unknown) {
 		return handleApiError(ctx, error)
 	}
