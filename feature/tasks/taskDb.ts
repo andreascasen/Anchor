@@ -1,7 +1,7 @@
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { z } from 'zod'
-import { dbClient } from '../dataSources/sqlite'
-import { recurrencePatternSchema } from '../service/tasks/recurrence'
+import { dbClient } from '../../dataSources/sqlite'
+import { recurrencePatternSchema } from './util/recurrence'
 
 export const taskSchema = z.object({
 	due: z.iso.datetime({ precision: -1 }).optional(),
@@ -24,12 +24,22 @@ export const tasksTable = sqliteTable('tasks', {
 	recurrence: text('recurrence'),
 })
 
-export const createTask = async () => {
+export const createTask = async ({
+	title,
+	description,
+	priority,
+	status,
+	recurrence,
+}: Task) => {
 	const result = await dbClient
 		.insert(tasksTable)
 		.values({
 			id: crypto.randomUUID(),
-			title: 'New Task',
+			title,
+			description,
+			priority,
+			status,
+			recurrence: JSON.stringify(recurrence),
 		})
 		.returning({ id: tasksTable.id })
 	return result[0]
