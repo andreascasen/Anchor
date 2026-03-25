@@ -12,6 +12,8 @@ await fs.mkdir(env.DB_DIRECTORY, { recursive: true })
 const sqlite = new Database(DB_PATH)
 export const dbClient = drizzle({ client: sqlite })
 
-migrate(dbClient, { migrationsFolder: path.join(import.meta.dir, '../migrations') })
+migrate(dbClient, {
+	migrationsFolder: path.join(import.meta.dir, '../migrations'),
+})
 
-export { notes, tasks } from './schema'
+export { notes, tasksTable } from './schema'

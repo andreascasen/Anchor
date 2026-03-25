@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { dbClient, tasks } from '../dataSources/sqlite'
 import { recurrencePatternSchema } from './util/recurrence'
 
 export const taskSchema = z.object({
@@ -12,5 +11,3 @@ export const taskSchema = z.object({
 })
 
 export type Task = z.infer<typeof taskSchema>
-
-export const tasksTable = tasks

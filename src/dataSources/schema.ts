@@ -13,7 +13,7 @@ export const notes = sqliteTable('notes', {
 	indexedAt: text('indexed_at').notNull(),
 })
 
-export const tasks = sqliteTable('tasks', {
+export const tasksTable = sqliteTable('tasks', {
 	id: text('id').primaryKey(),
 	due: text('due'),
 	title: text('title').notNull(),

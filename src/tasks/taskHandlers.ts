@@ -1,7 +1,7 @@
 import { eq, inArray, not } from 'drizzle-orm'
-import { dbClient } from '../dataSources/sqlite'
+import { dbClient, tasksTable } from '../dataSources/sqlite'
 import { NotFoundError, ValidationError } from '../lib/errors'
-import { taskSchema, tasksTable } from './taskDb'
+import { taskSchema } from './taskDb'
 
 export const createTask = async (params: unknown) => {
 	const { success, data: taskPayload } = taskSchema.safeParse(params)
