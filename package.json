@@ -2,8 +2,8 @@
 	"name": "anchor",
 	"module": "index.ts",
 	"scripts": {
-		"dev": "bun --watch index.ts",
-		"db:generate": "drizzle-kit generate"
+		"dev": "bun --watch src/index.ts",
+		"db:generate": "drizzle-kit generate --config src/drizzle.config.ts"
 	},
 	"type": "module",
 	"private": true,

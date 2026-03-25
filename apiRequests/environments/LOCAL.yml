@@ -1,0 +1,6 @@
+name: LOCAL
+variables:
+  - name: BASE_URL
+    value: http://localhost:3000
+  - name: API_KEY
+    value: test123

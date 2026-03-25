@@ -1,0 +1,24 @@
+info:
+  name: Update Task
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{BASE_URL}}/api/tasks/2f7deaf0-9f4a-4140-b8c0-5f3999fa4c2b"
+  headers:
+    - name: x-api-key
+      value: test123
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Call Mom"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

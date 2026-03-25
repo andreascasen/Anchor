@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { createTask, deleteTasks, getTasks, updateTask } from './taskHandlers'
-import { handleApiError } from '../../lib/errors'
+import { handleApiError } from '../lib/errors'
 
 export const tasksRouter = new Hono()
 

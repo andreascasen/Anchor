@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test'
-import { NotFoundError, ValidationError } from '../../lib/errors'
+import { NotFoundError, ValidationError } from '../lib/errors'
 
 const mockInsertReturning = mock()
 const mockSelectWhere = mock()

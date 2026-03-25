@@ -1,18 +1,18 @@
 import { Hono } from 'hono'
-import { env } from './env'
 
+import { env } from './env'
+import { tasksRouter } from './tasks/taskRoutes'
 import { syncAndIndex } from './dataSources/obsidian'
-import { tasksRouter } from './feature/tasks/taskRoutes'
 
 const app = new Hono()
 
-// app.use('/api/*', async (ctx, next) => {
-// 	const key = ctx.req.header('x-api-key')
-// 	if (key !== env.API_KEY) {
-// 		return ctx.json({ error: 'Unauthorized' }, 401)
-// 	}
-// 	return next()
-// })
+app.use('/*', async (ctx, next) => {
+	const key = ctx.req.header('x-api-key')
+	if (key !== env.API_SECRET) {
+		return ctx.json({ error: 'Unauthorized' }, 401)
+	}
+	return next()
+})
 
 app.route('/api/tasks', tasksRouter)
 

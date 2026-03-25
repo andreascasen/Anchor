@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const envSchema = z.object({
 	PORT: z.coerce.number().default(3000),
-	API_KEY: z.string(),
+	API_SECRET: z.string(),
 	DB_DIRECTORY: z.string(),
 	OBSIDIAN_VAULT_PATH: z.string(),
 })

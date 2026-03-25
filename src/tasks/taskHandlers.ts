@@ -1,6 +1,6 @@
 import { eq, inArray, not } from 'drizzle-orm'
-import { dbClient } from '../../dataSources/sqlite'
-import { NotFoundError, ValidationError } from '../../lib/errors'
+import { dbClient } from '../dataSources/sqlite'
+import { NotFoundError, ValidationError } from '../lib/errors'
 import { taskSchema, tasksTable } from './taskDb'
 
 export const createTask = async (params: unknown) => {
@@ -46,7 +46,9 @@ export const updateTask = async (taskId: string, params: unknown) => {
 		.update(tasksTable)
 		.set({
 			...taskData,
-			...(recurrence !== undefined && { recurrence: JSON.stringify(recurrence) }),
+			...(recurrence !== undefined && {
+				recurrence: JSON.stringify(recurrence),
+			}),
 		})
 		.where(eq(tasksTable.id, taskId))
 		.returning()

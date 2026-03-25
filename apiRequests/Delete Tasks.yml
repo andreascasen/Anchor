@@ -1,0 +1,31 @@
+info:
+  name: Delete Tasks
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: "{{BASE_URL}}/api/tasks"
+  headers:
+    - name: x-api-key
+      value: test123
+  params:
+    - name: ""
+      value: ""
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "taskIds": [
+          "2f7deaf0-9f4a-4140-b8c0-5f3999fa4c2b",
+          "0cfc79cd-add9-4ff4-a3eb-5daaf23981e7"
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
