@@ -2,7 +2,7 @@ import { eq, inArray, not } from 'drizzle-orm'
 import type z from 'zod'
 import { dbClient, tasksTable } from '../dataSources/sqlite'
 import { NotFoundError, ValidationError } from '../lib/errors'
-import { partialTaskSchema, taskSchema } from './taskSchemas'
+import type { partialTaskSchema, taskSchema } from './taskSchemas'
 
 export const createTask = async (params: z.infer<typeof taskSchema>) => {
 	const { recurrence, ...taskData } = params
