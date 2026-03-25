@@ -1,5 +1,6 @@
 import type { Context } from 'hono'
-import { CustomError } from './errors'
+import type { ZodType } from 'zod'
+import { CustomError, ValidationError } from './errors'
 
 export const handlerWrapper = async (
 	ctx: Context,
@@ -17,4 +18,18 @@ export const handlerWrapper = async (
 		ctx.status(500)
 		return ctx.json({ error: 'Internal Server Error' })
 	}
+}
+
+export const validateRequestBody = async <T>(
+	ctx: Context,
+	schema: ZodType<T>,
+): Promise<T> => {
+	const body = await ctx.req.json()
+	const { success, data, error } = schema.safeParse(body)
+
+	if (!success) {
+		throw new ValidationError('Invalid request body')
+	}
+
+	return data
 }

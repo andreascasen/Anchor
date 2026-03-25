@@ -1,6 +1,9 @@
 import { Hono } from 'hono'
-import { createTask, deleteTasks, getTasks, updateTask } from './taskHandlers'
+import z from 'zod'
+import { validateRequestBody } from '../lib/api'
 import { handleApiError } from '../lib/errors'
+import { taskSchema } from './taskDb'
+import { createTask, deleteTasks, getTasks, updateTask } from './taskHandlers'
 
 export const tasksRouter = new Hono()
 
@@ -43,9 +46,12 @@ tasksRouter.patch('/:id', async (ctx) => {
 
 tasksRouter.delete('/', async (ctx) => {
 	try {
-		const params = await ctx.req.json()
+		const bodyInputSchema = z.object({
+			taskIds: z.array(z.string()),
+		})
+		const { taskIds } = await validateRequestBody(ctx, bodyInputSchema)
 
-		const deletedTaskIds = await deleteTasks(params.taskIds)
+		const deletedTaskIds = await deleteTasks(taskIds)
 
 		ctx.status(204)
 		return ctx.json({ message: 'Tasks deleted', deletedTaskIds })
