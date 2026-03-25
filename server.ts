@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import { env } from './env'
-import { tasksRouter } from './api/tasks'
+
 import { syncAndIndex } from './dataSources/obsidian'
+import { tasksRouter } from './feature/tasks/taskRoutes'
 
 const app = new Hono()
 
