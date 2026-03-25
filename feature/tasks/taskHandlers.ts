@@ -1,4 +1,4 @@
-import { eq, not } from 'drizzle-orm'
+import { eq, inArray, not } from 'drizzle-orm'
 import { dbClient } from '../../dataSources/sqlite'
 import { ValidationError } from '../../lib/errors'
 import { taskSchema, tasksTable } from './taskDb'
@@ -33,9 +33,15 @@ export const getTasks = async () => {
 	return tasks
 }
 
-export const deleteTask = async (taskId: string) => {
-	const deletedTaskId = await dbClient
+export const deleteTasks = async (taskIds: string[]) => {
+	if (taskIds.length === 0) {
+		throw new ValidationError('No task IDs provided for deletion')
+	}
+
+	const deletedTaskIds = await dbClient
 		.delete(tasksTable)
-		.where(eq(tasksTable.id, taskId))
-		.returning()
+		.where(inArray(tasksTable.id, taskIds))
+		.returning({ id: tasksTable.id })
+
+	return deletedTaskIds
 }
