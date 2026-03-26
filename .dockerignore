@@ -1,0 +1,6 @@
+.env*
+db/
+.git
+plans/
+apiRequests/
+node_modules

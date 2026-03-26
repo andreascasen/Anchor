@@ -1,0 +1,15 @@
+services:
+  anchor:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - /data/anchor/db:/data/db        # SQLite persistence (DB_DIRECTORY)
+      - /data/anchor/vault:/data/vault  # Notes git repo (OBSIDIAN_VAULT_PATH)
+      - /root/.ssh:/root/.ssh:ro        # SSH keys for git pull auth
+    environment:
+      DB_DIRECTORY: /data/db
+      OBSIDIAN_VAULT_PATH: /data/vault
+      PORT: 3000
+      # API_SECRET is injected via Dokploy UI — do not hardcode here
