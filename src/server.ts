@@ -21,7 +21,11 @@ app.get('/api/sync', async (ctx) => {
 })
 
 app.get('/health', (ctx) =>
-	ctx.json({ ok: true, ts: new Date().toISOString() }),
+	ctx.json({
+		ok: true,
+		ts: new Date().toISOString(),
+		message: 'Server is healthy',
+	}),
 )
 
 app.get('/*', async (ctx) => {
