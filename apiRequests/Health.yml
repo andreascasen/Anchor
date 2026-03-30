@@ -8,7 +8,7 @@ http:
   url: "{{BASE_URL}}/health"
   headers:
     - name: x-api-key
-      value: test
+      value: test1
   auth: inherit
 
 settings:

@@ -1,8 +1,7 @@
 import { Hono } from 'hono'
-
+import { syncAndIndex } from './dataSources/obsidian'
 import { env } from './env'
 import { tasksRouter } from './tasks/taskRoutes'
-import { syncAndIndex } from './dataSources/obsidian'
 
 const app = new Hono()
 
@@ -26,7 +25,7 @@ app.get('/health', (ctx) =>
 )
 
 app.get('/*', async (ctx) => {
-	return ctx.json({ error: 'Route not found' }, 404)
+	return ctx.json({ error: 'Route not found', targetPath: ctx.req.path }, 404)
 })
 
 export default app
