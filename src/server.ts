@@ -25,7 +25,7 @@ app.get('/health', (ctx) =>
 )
 
 app.get('/*', async (ctx) => {
-	return ctx.json({ error: 'Route not found', targetPath: ctx.req.path }, 404)
+	return ctx.json({ error: 'Path not found', targetPath: ctx.req.path }, 404)
 })
 
 export default app
